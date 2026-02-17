@@ -14,18 +14,22 @@ dotenv.config({ path: path.join(__dirname, '../.env') });
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+const BASE_URL = process.env.RENDER_EXTERNAL_URL || `http://localhost:${PORT}`;
 
 // Middleware
 app.use(cors({
-    origin: 'http://localhost:5175',
+    origin: BASE_URL,
     credentials: true
 }));
 app.use(bodyParser.json());
 app.use(session({
-    secret: 'your-secret-key', // In production, use a secure env var
+    secret: process.env.SESSION_SECRET || 'your-secret-key',
     resave: false,
     saveUninitialized: false,
-    cookie: { secure: false } // Set to true if using https
+    cookie: {
+        secure: process.env.NODE_ENV === 'production',
+        maxAge: 24 * 60 * 60 * 1000 // 24 hours
+    }
 }));
 app.use(passport.initialize());
 app.use(passport.session());
@@ -47,7 +51,7 @@ if (!process.env.GOOGLE_CLIENT_ID || !process.env.GOOGLE_CLIENT_SECRET) {
 passport.use(new GoogleStrategy({
     clientID: process.env.GOOGLE_CLIENT_ID,
     clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-    callbackURL: 'http://localhost:3000/auth/google/callback',
+    callbackURL: `${BASE_URL}/auth/google/callback`,
     scope: ['profile', 'email', 'https://www.googleapis.com/auth/calendar']
 }, (accessToken, refreshToken, profile, done) => {
     // Store tokens in user session or DB
@@ -70,7 +74,7 @@ app.get('/auth/google/callback',
     passport.authenticate('google', { failureRedirect: '/' }),
     (req, res) => {
         // Successful authentication, redirect to frontend app
-        res.redirect('http://localhost:5175'); // Assuming Vite runs on 5175
+        res.redirect('/');
     }
 );
 
@@ -94,7 +98,7 @@ app.post('/api/query', async (req, res) => {
         const oAuth2Client = new google.auth.OAuth2(
             process.env.GOOGLE_CLIENT_ID,
             process.env.GOOGLE_CLIENT_SECRET,
-            'http://localhost:3000/auth/google/callback'
+            `${BASE_URL}/auth/google/callback`
         );
         oAuth2Client.setCredentials({
             access_token: user.accessToken,
