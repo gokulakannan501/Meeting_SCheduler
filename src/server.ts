@@ -242,21 +242,21 @@ app.post('/api/query', async (req, res) => {
     }
 });
 
+// Serve static files from the React frontend app
+const frontendPath = path.join(__dirname, '../frontend/dist');
+app.use(express.static(frontendPath));
+
+// Anything that doesn't match the above, send back index.html
+app.get('*', (req, res) => {
+    res.sendFile(path.join(frontendPath, 'index.html'));
+});
+
 const server = app.listen(PORT, () => {
     console.log(`Server running on http://localhost:${PORT}`);
     // Keep the process alive
     setInterval(() => {
         // Heartbeat
     }, 10000);
-});
-
-// Serve static files from the React frontend app
-const frontendPath = path.join(__dirname, '../frontend-new/dist');
-app.use(express.static(frontendPath));
-
-// Anything that doesn't match the above, send back index.html
-app.get('*', (req, res) => {
-    res.sendFile(path.join(frontendPath, 'index.html'));
 });
 
 server.on('error', (e) => {
