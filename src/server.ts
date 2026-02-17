@@ -243,7 +243,7 @@ app.post('/api/query', async (req, res) => {
 });
 
 // Serve static files from the React frontend app
-const frontendPath = path.join(__dirname, '../frontend/dist');
+const frontendPath = path.join(__dirname, '../client/dist');
 app.use(express.static(frontendPath));
 
 // Anything that doesn't match the above, send back index.html

@@ -8,3 +8,4 @@ frontend-new/.env
 coverage
 token.json
 credentials.json
+frontend/
