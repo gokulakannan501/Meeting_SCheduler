@@ -1,0 +1,10 @@
+node_modules
+dist
+.env
+.DS_Store
+frontend-new/node_modules
+frontend-new/dist
+frontend-new/.env
+coverage
+token.json
+credentials.json
