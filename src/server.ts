@@ -13,8 +13,13 @@ import { Agent } from './agent';
 dotenv.config({ path: path.join(__dirname, '../.env') });
 
 const app = express();
+// Trust Proxy for Render/Heroku
+app.set('trust proxy', 1);
+
 const PORT = process.env.PORT || 3000;
-const BASE_URL = process.env.RENDER_EXTERNAL_URL || `http://localhost:${PORT}`;
+// Remove trailing slash if present
+const RAW_BASE_URL = process.env.RENDER_EXTERNAL_URL || `http://localhost:${PORT}`;
+const BASE_URL = RAW_BASE_URL.replace(/\/$/, '');
 
 // Middleware
 app.use(cors({
@@ -77,6 +82,15 @@ app.get('/auth/google/callback',
         res.redirect('/');
     }
 );
+
+app.get('/debug-auth', (req, res) => {
+    res.json({
+        baseUrl: BASE_URL,
+        callbackUrl: `${BASE_URL}/auth/google/callback`,
+        renderExternalUrl: process.env.RENDER_EXTERNAL_URL,
+        port: PORT
+    });
+});
 
 app.get('/api/user', (req, res) => {
     if (req.isAuthenticated()) {
